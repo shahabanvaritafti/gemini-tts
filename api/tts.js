@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       contents: text,
       config: {
         responseModalities: ["AUDIO"],
@@ -30,14 +30,14 @@ export default async function handler(req, res) {
     const audioPart = candidate?.content?.parts?.find(p => p.inlineData);
 
     if (!audioPart || !audioPart.inlineData) {
-      return res.status(500).send('خروجی صوتی دریافت نشد.');
+      return res.status(500).send('خروجی صوتی از مدل دریافت نشد.');
     }
 
     const audioBuffer = Buffer.from(audioPart.inlineData.data, 'base64');
     res.setHeader('Content-Type', audioPart.inlineData.mimeType || 'audio/wav');
     return res.send(audioBuffer);
   } catch (error) {
-    console.error(error);
-    return res.status(500).send(error.message || 'خطا در ارتباط با هوش مصنوعی');
+    console.error("Gemini Error:", error);
+    return res.status(500).send(error.message || 'خطا در ارتباط با جمینای');
   }
 }
