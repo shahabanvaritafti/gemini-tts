@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>خوانش صوتی فارسی</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 500px; margin: 50px auto; padding: 0 15px; }
+    textarea { width: 100%; height: 100px; padding: 10px; font-size: 15px; box-sizing: border-box; }
+    button { padding: 10px 20px; font-size: 15px; margin-top: 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h3>تبدیل متن به گفتار با جمینای</h3>
+  <textarea id="txt">متن آزمایشی فارسی برای خوانده شدن توسط هوش مصنوعی.</textarea>
+  <br>
+  <button id="btn" onclick="playAudio()">پخش گفتار</button>
+
+  <script>
+    async function playAudio() {
+      const text = document.getElementById('txt').value.trim();
+      const btn = document.getElementById('btn');
+      if (!text) return;
+
+      btn.disabled = true;
+      btn.innerText = "در حال دریافت صدا...";
+
+      try {
+        const res = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+
+        if (!res.ok) throw new Error("پاسخ ناموفق از سرور");
+
+        const blob = await res.blob();
+        const audioUrl = URL.createObjectURL(blob);
+        const player = new Audio(audioUrl);
+        player.play();
+        player.onended = () => URL.revokeObjectURL(audioUrl);
+      } catch (err) {
+        alert("خطا: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "پخش گفتار";
+      }
+    }
+  </script>
+</body>
+</html>
